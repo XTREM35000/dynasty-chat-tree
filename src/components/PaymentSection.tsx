@@ -2,11 +2,37 @@
 import React, { useState } from 'react';
 import { Crown, Star, Zap, Check, CreditCard, Gift } from 'lucide-react';
 
+interface BasePlan {
+  name: string;
+  price: string;
+  period: string;
+  icon: JSX.Element;
+  color: string;
+  features: string[];
+}
+
+interface BasicPlan extends BasePlan {
+  popular?: never;
+  lifetime?: never;
+}
+
+interface PremiumPlan extends BasePlan {
+  popular: boolean;
+  lifetime?: never;
+}
+
+interface DynastyPlan extends BasePlan {
+  popular?: never;
+  lifetime: boolean;
+}
+
+type Plan = BasicPlan | PremiumPlan | DynastyPlan;
+
 const PaymentSection = () => {
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium' | 'dynasty'>('premium');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const plans = {
+  const plans: Record<'basic' | 'premium' | 'dynasty', Plan> = {
     basic: {
       name: 'Basique',
       price: '5€',
@@ -83,10 +109,10 @@ const PaymentSection = () => {
             key={key}
             className={`relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 ${
               selectedPlan === key ? 'border-[var(--whatsapp-green)] scale-105' : 'border-gray-200'
-            } ${plan.popular ? 'md:scale-110 md:z-10' : ''}`}
+            } ${'popular' in plan && plan.popular ? 'md:scale-110 md:z-10' : ''}`}
             onClick={() => setSelectedPlan(key as any)}
           >
-            {plan.popular && (
+            {'popular' in plan && plan.popular && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <div className="whatsapp-gradient text-white px-4 py-1 rounded-full text-sm font-medium">
                   ⭐ Plus populaire
@@ -94,7 +120,7 @@ const PaymentSection = () => {
               </div>
             )}
 
-            {plan.lifetime && (
+            {'lifetime' in plan && plan.lifetime && (
               <div className="absolute -top-4 right-4">
                 <div className="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
                   <Gift className="w-3 h-3 inline mr-1" />
