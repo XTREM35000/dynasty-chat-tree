@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Crown, Users, MessageCircle, LogOut } from 'lucide-react';
+import { Crown, Users, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useDynasties } from '@/hooks/useDynasties';
 import { Button } from '@/components/ui/button';
+import UserMenu from './UserMenu';
 
 const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { dynasties, loading } = useDynasties();
   const [isTyping, setIsTyping] = useState(false);
   const [currentText, setCurrentText] = useState('');
@@ -35,10 +36,6 @@ const Header = () => {
   }, [textIndex, texts]);
 
   const totalMembers = dynasties.reduce((sum, dynasty) => sum + (dynasty.member_count || 0), 0);
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   return (
     <header className="whatsapp-gradient shadow-lg sticky top-0 z-50">
@@ -91,14 +88,8 @@ const Header = () => {
               <span>Créer Dynastie</span>
             </button>
 
-            <Button
-              onClick={handleSignOut}
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white hover:bg-opacity-20"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
+            {/* Menu utilisateur avec avatar */}
+            {user && <UserMenu />}
           </div>
         </div>
 
