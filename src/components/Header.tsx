@@ -1,8 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Crown, Users, MessageCircle } from 'lucide-react';
+import { Crown, Users, MessageCircle, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useDynasties } from '@/hooks/useDynasties';
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
+  const { user, signOut } = useAuth();
+  const { dynasties, loading } = useDynasties();
   const [isTyping, setIsTyping] = useState(false);
   const [currentText, setCurrentText] = useState('');
   const texts = [
@@ -29,6 +34,12 @@ const Header = () => {
     return () => clearInterval(interval);
   }, [textIndex, texts]);
 
+  const totalMembers = dynasties.reduce((sum, dynasty) => sum + (dynasty.member_count || 0), 0);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <header className="whatsapp-gradient shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -40,7 +51,7 @@ const Header = () => {
                 <Crown className="w-6 h-6 text-[var(--whatsapp-green)]" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
-                3
+                {dynasties.length}
               </div>
             </div>
             <div className="text-white">
@@ -51,7 +62,9 @@ const Header = () => {
                   <span className="animate-slide-in-left">{currentText}</span>
                 )}
               </h1>
-              <p className="text-green-100 text-sm">Connectez vos générations</p>
+              <p className="text-green-100 text-sm">
+                Connecté en tant que {user?.user_metadata?.full_name || user?.email}
+              </p>
             </div>
           </div>
 
@@ -59,11 +72,11 @@ const Header = () => {
           <div className="flex items-center space-x-3">
             <div className="hidden md:flex items-center space-x-6 text-white">
               <div className="text-center">
-                <div className="text-2xl font-bold">12</div>
+                <div className="text-2xl font-bold">{loading ? '...' : dynasties.length}</div>
                 <div className="text-xs text-green-100">Dynasties</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">247</div>
+                <div className="text-2xl font-bold">{loading ? '...' : totalMembers}</div>
                 <div className="text-xs text-green-100">Membres</div>
               </div>
             </div>
@@ -77,6 +90,15 @@ const Header = () => {
               <Users className="w-4 h-4" />
               <span>Créer Dynastie</span>
             </button>
+
+            <Button
+              onClick={handleSignOut}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white hover:bg-opacity-20"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
@@ -85,10 +107,12 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
               <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
-              <span>3 dynasties en ligne</span>
+              <span>{dynasties.length} dynasties actives</span>
             </div>
             <div className="hidden sm:block">•</div>
-            <div className="hidden sm:block">Dernière activité: il y a 2 min</div>
+            <div className="hidden sm:block">
+              {user ? `Connecté: ${user.user_metadata?.username || 'Utilisateur'}` : 'Non connecté'}
+            </div>
           </div>
           <div className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-xs">
             Version 2.1 ✨
